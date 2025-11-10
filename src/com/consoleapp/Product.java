@@ -10,12 +10,21 @@ public class Product {
 	private int quantity;
 
 	// constructor
-	public Product(String productName,/* Category category,*/ double price, int id) {		
-		this.ProductName = productName;
+	public Product(int id,String productName,double price,Category category,int quantity) {		
 		this.id = id;
+		this.ProductName = productName;	
 		this.price = price;
-		//this.category = category;
+		this.category = category;	
+		this.quantity = quantity;
 	}
+	 // Added overloaded constructor to support (id, name, category, price, quantity)
+    public Product(int id, String productName, Category category, double price, int quantity) {
+        this(id, productName, price, category, quantity);
+    }
+	 // Optional constructor with default quantity
+    public Product(int id, String productName, double price, Category category) {
+        this(id, productName, price, category, 0);
+    }
 
 	// encapsulation use getter setter to access private properties
 	public void setProductName(String productName) {
