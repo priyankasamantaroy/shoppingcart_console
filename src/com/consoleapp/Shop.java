@@ -36,19 +36,29 @@ public class Shop {
         shopItems.add(new Product(303, "Whole Wheat Bread", Category.GROCERY, 3.99, 50));
 		
 	}
-	//Diaplay available products
-	public void availableProducts()
-	{
-		if (shopItems.isEmpty()) {
+	 // Display all available products with better formatting
+    public void availableProducts() {
+        if (shopItems.isEmpty()) {
             System.out.println("No products available.");
             return;
         }
-		System.out.println("Avaliable products in shop : ");
-			
-		for(Product p:shopItems) {
-			p.displayProduct();
-		}
-	}
+        
+        System.out.println("\n========== AVAILABLE PRODUCTS IN SHOP ==========");
+        System.out.println(String.format("%-6s | %-30s | %-15s | %-10s | %-8s", 
+            "ID", "Product Name", "Category", "Price", "Stock"));
+        System.out.println("================================================");
+        
+        for(Product p : shopItems) {
+            System.out.println(String.format("%-6d | %-30s | %-15s | £%-9.2f | %-8d", 
+                p.getId(), 
+                p.getProductName(), 
+                p.getCategory().name(), 
+                p.getPrice(), 
+                p.getQuantity()));
+        }
+        
+        System.out.println("================================================\n");
+    }
 	
 	//search product by ID
 	public Product searchProductById(int id)
@@ -62,9 +72,12 @@ public class Shop {
 		
 	}
 
-	 // Admin: add product to shop inventory
+	    // Admin: add product to shop inventory
     public void addProduct(Product product) {
-        if (product == null) return;
+        if (product == null) {
+            System.out.println("Error: Product cannot be null!");
+            return;
+        }
         shopItems.add(product);
     }
 
@@ -76,7 +89,35 @@ public class Shop {
     // Read-only copy of products
     public List<Product> getProducts() {
         return new ArrayList<>(shopItems);
-    }	
+    }
+	
+	
+	 // Display products with detailed information
+    public void displayProductsDetailed() {
+        if (shopItems.isEmpty()) {
+            System.out.println("No products available.");
+            return;
+        }
+        
+        System.out.println("\n========== PRODUCT DETAILS ==========");
+        for(Product p : shopItems) {
+            System.out.println(p.displayProduct());
+            System.out.println("------------------------------------");
+        }
+        System.out.println("=====================================\n");
+    }
+
+	// Get total product count
+    public int getTotalProducts() {
+        return shopItems.size();
+    }
+
+	 // Get total inventory value
+    public double getInventoryValue() {
+        return shopItems.stream()
+            .mapToDouble(p -> p.getPrice() * p.getQuantity())
+            .sum();
+    }
 	
 
 }
