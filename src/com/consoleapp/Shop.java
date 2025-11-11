@@ -118,6 +118,53 @@ public class Shop {
             .mapToDouble(p -> p.getPrice() * p.getQuantity())
             .sum();
     }
-	
+   
+
+    //new for admin access================================================
+    // Add new product to store
+    public void addProductToStore(int id, String name, double price, String category, int quantity) {
+        // Convert string category to Category enum
+        Category cat;
+        try {
+            cat = Category.valueOf(category.toUpperCase());
+        } catch(IllegalArgumentException e) {
+            System.out.println("Invalid category! Using ELECTRONICS as default.");
+            cat = Category.ELECTRONICS;
+        }
+        
+        Product newProduct = new Product(id, name, cat, price, quantity);
+        addProduct(newProduct);
+    }
+    
+    // Remove product from store
+    public void removeProductFromStore(int productId) {        
+        for(int i = 0; i < shopItems.size(); i++) {
+            if(shopItems.get(i).getId() == productId) {
+                shopItems.remove(i);
+                System.out.println("Product ID " + productId + " removed from store.");
+                return;
+            }
+        }
+        System.out.println("Product ID " + productId + " not found!");
+    }
+    
+    // Update product in store
+    public void updateProductInStore(int productId, String newName, double newPrice, int newQuantity) {
+        Product p = searchProductById(productId);
+        if(p != null) {
+            if(newName != null && !newName.trim().isEmpty()) {
+                p.setProductName(newName);
+            }
+            if(newPrice > 0) {
+                p.setPrice(newPrice);
+            }
+            if(newQuantity >= 0) {
+                p.setQuantity(newQuantity);
+            }
+            System.out.println("Product ID " + productId + " updated successfully!");
+        } else {
+            System.out.println("Product ID " + productId + " not found!");
+        }
+    }
 
 }

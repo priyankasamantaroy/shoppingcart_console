@@ -46,6 +46,9 @@ public class Product {
 	public double getPrice() {
 		return price;
 	}
+	public void setPrice(double price) {
+		this.price = price;
+	}
 
 	public Category getCategory() {
 		return category;
