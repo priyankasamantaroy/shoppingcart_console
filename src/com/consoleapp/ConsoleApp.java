@@ -12,86 +12,33 @@ public class ConsoleApp {
         Scanner sc = new Scanner(System.in);
         
         try {
-            // Customer name entry
-            String custName;
+            // User name entry
+            String userName;
             System.out.println("Enter Your Name: ");
-            custName = sc.nextLine().trim();
+            userName = sc.nextLine().trim();
             
-            if(custName.isEmpty()) {
+            if(userName.isEmpty()) {
                 System.out.println("Name cannot be empty!");
                 sc.close();
                 return;
             }
             
-            // Verify User
-            System.out.println("Which user are you? (customer or Admin): ");
+            // Verify User Type
+            System.out.println("Which user are you? (customer or admin): ");
             String userType = sc.nextLine().trim().toLowerCase();
             
-            // Create user instance
-            Customer customer = new Customer(custName);
+            // Validate user type
+            if(!userType.equals("customer") && !userType.equals("admin")) {
+                System.out.println("Invalid user type! Only 'customer' or 'admin' are allowed.");
+                sc.close();
+                return;
+            }
             
-            // Create shop instance
-            Shop shop = new Shop();
-            
-            // Welcome message
-            System.out.println("\n******** Welcome to ShoppingCartConsole: " + custName + " ******* \n");
-            
-            // Main menu loop
-            boolean continueShopping = true;
-            while(continueShopping) {
-                
-                // Print options to select
-                System.out.println(">> View Products/Catalog: 1");
-                System.out.println(">> Add Items to cart: 2"); 
-                System.out.println(">> Display/View cart items and Itemized total: 3");
-                System.out.println(">> Update/Remove Product: 4");
-                System.out.println(">> Checkout: 5");
-                System.out.println(">> EXIT the Console/System: 6");
-                
-                System.out.println("\nWhich option you want to select (1-6)?: ");
-                
-                int option = getValidInput(sc, 1, 6);
-                System.out.println("You have selected option: " + option + "\n");
-                
-                switch(option) {
-                    
-                    // View products catalog
-                    case 1:
-                        System.out.println("=== View Available Products ===");
-                        shop.availableProducts();
-                        break;
-                    
-                    // Add products to cart
-                    case 2:
-                        addProductToCart(sc, shop, customer);
-                        break;
-                    
-                    // View cart and total
-                    case 3:
-                        viewCart(customer);
-                        break;
-                    
-                    // Update/Remove Product
-                    case 4:
-                        removeProductFromCart(sc, customer);
-                        break;
-                    
-                    // Checkout
-                    case 5:
-                        checkout(customer);
-                        break;
-                    
-                    // Exit
-                    case 6:
-                        continueShopping = false;
-                        System.out.println("\nThank you for shopping! Goodbye!");
-                        break;
-                    
-                    default:
-                        System.out.println("Invalid option!");
-                }
-                
-                System.out.println();
+            // Route to appropriate interface
+            if(userType.equals("customer")) {
+                customerInterface(sc, userName);
+            } else if(userType.equals("admin")) {
+                adminInterface(sc, userName);
             }
             
         } catch(Exception e) {
@@ -102,6 +49,248 @@ public class ConsoleApp {
         }
     }
     
+    // ===================== CUSTOMER INTERFACE =====================
+    private static void customerInterface(Scanner sc, String custName) {
+        // Create customer instance
+        Customer customer = new Customer(custName);
+        
+        // Create shop instance
+        Shop shop = new Shop();
+        
+        // Welcome message
+        System.out.println("\n******** Welcome to ShoppingCartConsole: " + custName + " ******* \n");
+        
+        // Main menu loop
+        boolean continueShopping = true;
+        while(continueShopping) {
+            
+            // Print options to select
+            System.out.println(">> View Products/Catalog: 1");
+            System.out.println(">> Add Items to cart: 2"); 
+            System.out.println(">> Display/View cart items and Itemized total: 3");
+            System.out.println(">> Update/Remove Product: 4");
+            System.out.println(">> Checkout: 5");
+            System.out.println(">> EXIT the Console/System: 6");
+            
+            System.out.println("\nWhich option you want to select (1-6)?: ");
+            
+            int option = getValidInput(sc, 1, 6);
+            System.out.println("You have selected option: " + option + "\n");
+            
+            switch(option) {
+                
+                // View products catalog
+                case 1:
+                    System.out.println("=== View Available Products ===");
+                    shop.availableProducts();
+                    break;
+                
+                // Add products to cart
+                case 2:
+                    try {
+                        System.out.println("=== Add Items to Cart ===");
+                        System.out.println("Enter product ID: ");
+                        int pId = sc.nextInt();
+                        
+                        Product p = shop.searchProductById(pId);
+                        if(p == null) {
+                            System.out.println("Product not found!");
+                            sc.nextLine();
+                            break;
+                        }
+                        
+                        System.out.println("Enter quantity: ");
+                        int quantity = getValidInput(sc, 1, 1000);
+                        
+                        customer.getCart().addProduct(p, quantity, p.getCategory());
+                        System.out.println("Product added to cart successfully!");
+                    } catch(Exception e) {
+                        System.out.println("Error adding product: " + e.getMessage());
+                        sc.nextLine();
+                    }
+                    break;
+                
+                // View cart and total
+                case 3:
+                    System.out.println("=== Your Cart ===");
+                    customer.getCart().displayCart_Product();
+                    System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
+                    break;
+                
+                // Update/Remove Product
+                case 4:
+                    try {
+                        System.out.println("=== Remove Product from Cart ===");
+                        customer.getCart().displayCart_Product();
+                        
+                        System.out.println("\nEnter Product ID to Remove: ");
+                        int removeID = sc.nextInt();
+                        
+                        System.out.println("Enter Quantity to Remove: ");
+                        int removeQuantity = getValidInput(sc, 1, 1000);
+                        
+                        customer.getCart().removeProduct(removeID, removeQuantity);
+                        
+                        System.out.println("\n--- Remaining Products in Cart ---");
+                        customer.getCart().displayCart_Product();
+                        System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
+                    } catch(Exception e) {
+                        System.out.println("Error removing product: " + e.getMessage());
+                        sc.nextLine();
+                    }
+                    break;
+                
+                // Checkout
+                case 5:
+                    double total = customer.getCart().calculateTotal();
+                    if(total == 0) {
+                        System.out.println("Your cart is empty!");
+                    } else {
+                        System.out.println("=== Checkout ===");
+                        System.out.println("Final Total: $" + total);
+                        System.out.println("Thank you for your purchase!");
+                    }
+                    break;
+                
+                // Exit
+                case 6:
+                    continueShopping = false;
+                    System.out.println("\nThank you for shopping! Goodbye!");
+                    break;
+                
+                default:
+                    System.out.println("Invalid option!");
+            }
+            
+            System.out.println();
+        }
+    }
+    
+    // ===================== ADMIN INTERFACE =====================
+    private static void adminInterface(Scanner sc, String adminName) {
+        Shop shop = new Shop();
+        
+        System.out.println("\n******** Welcome Admin: " + adminName + " ******* \n");
+        
+        boolean continueAdmin = true;
+        while(continueAdmin) {
+            
+            System.out.println(">> View All Products in Store: 1");
+            System.out.println(">> Add New Product to Store: 2");
+            System.out.println(">> Remove Product from Store: 3");
+            System.out.println(">> Update Product Details: 4");
+            System.out.println(">> View Inventory Value: 5");
+            System.out.println(">> Exit Admin Panel: 6");
+            
+            System.out.println("\nWhich option you want to select (1-6)?: ");
+            
+            int option = getValidInput(sc, 1, 6);
+            System.out.println("You have selected option: " + option + "\n");
+            
+            switch(option) {
+                
+                // View all products
+                case 1:
+                    System.out.println("=== All Store Products ===");
+                    shop.availableProducts();
+                    break;
+                
+                // Add product
+                case 2:
+                    try {
+                        System.out.println("=== Add New Product ===");
+                        System.out.println("Enter Product ID: ");
+                        int pId = sc.nextInt();
+                        sc.nextLine(); // Clear buffer
+                        
+                        System.out.println("Enter Product Name: ");
+                        String pName = sc.nextLine().trim();
+                        
+                        System.out.println("Enter Product Price: ");
+                        double pPrice = sc.nextDouble();
+                        sc.nextLine(); // Clear buffer
+                        
+                        System.out.println("Enter Product Category (ELECTRONICS, FASHION, GROCERY): ");
+                        String pCategory = sc.nextLine().trim();
+                        
+                        System.out.println("Enter Product Stock Quantity: ");
+                        int pStock = getValidInput(sc, 0, 10000);
+                        
+                        shop.addProductToStore(pId, pName, pPrice, pCategory, pStock);
+                        System.out.println("Product added to store successfully!");
+                    } catch(Exception e) {
+                        System.out.println("Error adding product: " + e.getMessage());
+                        sc.nextLine();
+                    }
+                    break;
+                
+                // Remove product
+                case 3:
+                    try {
+                        System.out.println("=== Remove Product ===");
+                        shop.availableProducts();
+                        System.out.println("Enter Product ID to Remove: ");
+                        int removeId = sc.nextInt();
+                        sc.nextLine();
+                        
+                        shop.removeProductFromStore(removeId);
+                    } catch(Exception e) {
+                        System.out.println("Error removing product: " + e.getMessage());
+                        sc.nextLine();
+                    }
+                    break;
+                
+                // Update product
+                case 4:
+                    try {
+                        System.out.println("=== Update Product ===");
+                        shop.availableProducts();
+                        System.out.println("Enter Product ID to Update: ");
+                        int updateId = sc.nextInt();
+                        sc.nextLine();
+                        
+                        System.out.println("Enter New Product Name (or press Enter to skip): ");
+                        String newName = sc.nextLine().trim();
+                        
+                        System.out.println("Enter New Product Price (or enter 0 to skip): ");
+                        double newPrice = sc.nextDouble();
+                        
+                        System.out.println("Enter New Stock Quantity (or enter -1 to skip): ");
+                        int newStock = sc.nextInt();
+                        sc.nextLine();
+                        
+                        shop.updateProductInStore(updateId, 
+                            newName.isEmpty() ? null : newName, 
+                            newPrice > 0 ? newPrice : -1, 
+                            newStock >= 0 ? newStock : -1);
+                    } catch(Exception e) {
+                        System.out.println("Error updating product: " + e.getMessage());
+                        sc.nextLine();
+                    }
+                    break;
+                
+                // View inventory value
+                case 5:
+                    System.out.println("=== Inventory Information ===");
+                    System.out.println("Total Products: " + shop.getTotalProducts());
+                    System.out.println("Total Inventory Value: $" + String.format("%.2f", shop.getInventoryValue()));
+                    break;
+                
+                // Exit
+                case 6:
+                    continueAdmin = false;
+                    System.out.println("\nAdmin panel closed. Goodbye!");
+                    break;
+                
+                default:
+                    System.out.println("Invalid option!");
+            }
+            
+            System.out.println();
+        }
+    }
+    
+    // ===================== HELPER METHOD =====================
     // Helper method to validate user input
     private static int getValidInput(Scanner sc, int min, int max) {
         while(true) {
@@ -122,80 +311,5 @@ public class ConsoleApp {
                 sc.nextLine(); // Clear buffer
             }
         }
-    }
-    
-    // Method to add product to cart
-    private static void addProductToCart(Scanner sc, Shop shop, Customer customer) {
-        try {
-            System.out.println("=== Add Items to Cart ===");
-            System.out.println("Enter product ID: ");
-            int pId = sc.nextInt();
-            
-            Product p = shop.searchProductById(pId);
-            if(p == null) {
-                System.out.println("Product not found!");
-                return;
-            }
-            
-            System.out.println("Enter quantity: ");
-            int quantity = getValidInput(sc, 1, 1000);
-            
-            p.setQuantity(quantity);
-            Category pCategory = p.getCategory();
-            
-            customer.cart.addProduct(p, quantity, pCategory);
-            System.out.println("Product added to cart successfully!");
-            
-        } catch(Exception e) {
-            System.out.println("Error adding product: " + e.getMessage());
-            sc.nextLine(); // Clear buffer
-        }
-    }
-    
-    // Method to view cart
-    private static void viewCart(Customer customer) {
-        System.out.println("=== Your Cart ===");
-        customer.getCart().displayCart_Product();
-        System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
-    }
-    
-    // Method to remove product from cart
-    private static void removeProductFromCart(Scanner sc, Customer customer) {
-        try {
-            System.out.println("=== Remove Product from Cart ===");
-            System.out.println("Current items in cart:");
-            customer.getCart().displayCart_Product();
-            
-            System.out.println("\nEnter Product ID to Remove: ");
-            int removeID = sc.nextInt();
-            
-            System.out.println("Enter Quantity to Remove: ");
-            int removeQuantity = getValidInput(sc, 1, 1000);
-            
-            customer.getCart().removeProduct(removeID, removeQuantity);
-            
-            System.out.println("\n--- Remaining Products in Cart ---");
-            customer.getCart().displayCart_Product();
-            System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
-            
-        } catch(Exception e) {
-            System.out.println("Error removing product: " + e.getMessage());
-            sc.nextLine(); // Clear buffer
-        }
-    }
-    
-    // Method for checkout
-    private static void checkout(Customer customer) {
-        System.out.println("=== Checkout ===");
-        double total = customer.getCart().calculateTotal();
-        
-        if(total == 0) {
-            System.out.println("Your cart is empty!");
-            return;
-        }
-        
-        System.out.println("Final Total: $" + total);
-        System.out.println("Thank you for your purchase!");
-        // Add payment processing logic here
     }
 }
