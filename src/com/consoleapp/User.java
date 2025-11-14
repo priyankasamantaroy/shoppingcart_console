@@ -7,7 +7,8 @@ public abstract class User {
     public User() {
         this.name = "";
     }
-
+    
+     //using varargs and conditioning logic to ensure null doesnt break code logic
     public User(String name) {
         this.name = name == null ? "" : name;
     }
@@ -16,8 +17,15 @@ public abstract class User {
         return name;
     }
 
+    //using varargs
     public void setName(String name) {
         this.name = name == null ? "" : name;
+    }
+      // LVTI example (Local Variable Type Inference - Java 10+)
+    public String getFormattedName() {
+        var name = this.name;  // LVTI - type inferred as String
+        var length = name.length();  
+        return name.toUpperCase();
     }
 
     @Override

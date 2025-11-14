@@ -2,13 +2,14 @@ package com.consoleapp;
 
 public class Product {
 
-	// properties declared private
+	// properties declared private using concept of encaptulation
 	private String ProductName;
 	private int id;
 	private double price;
 	private Category category;
 	private int quantity;
 
+	//Flexible constructor bodies to instanciate/create produt in different ways
 	// constructor
 	public Product(int id,String productName,double price,Category category,int quantity) {		
 		this.id = id;
@@ -25,6 +26,7 @@ public class Product {
     public Product(int id, String productName, double price, Category category) {
         this(id, productName, price, category, 0);
     }
+
 
 	// encapsulation use getter setter to access private properties
 	public void setProductName(String productName) {
@@ -67,6 +69,9 @@ public class Product {
 				+ ", quantity=" + quantity + "]";
 	}
 
+	
+	
+
 	// java25 Adv OOP: use record - immutable data structure for product info OR
 	// Summery
 	/*
@@ -75,5 +80,12 @@ public class Product {
 	 * 
 	 * }
 	 */
+	/* 
+	 // New: convert to immutable record copy
+    public ProductRecord toRecord() {
+        return new ProductRecord(this.id, this.ProductName, this.price, this.category, this.quantity);
+    }*/
+	
+	
 
 }

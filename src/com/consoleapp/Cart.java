@@ -1,6 +1,7 @@
 package com.consoleapp;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Cart {
 
@@ -14,6 +15,7 @@ public class Cart {
 	public Cart() {
 		products = new ArrayList<>();
 	}
+	
 
 	// methods
 	//Add product
@@ -48,9 +50,12 @@ public class Cart {
 	    if (!found) {
 	        product.setCategory(category);
 	        product.setQuantity(quantity);
+			
 	        products.add(product);
 	        System.out.println("PRODUCT ADDED TO CART : " + product.displayProduct());
 	    }
+		
+       
 	}
 	
 	
@@ -86,6 +91,8 @@ public class Cart {
 		for(Product product : products ) {			
 				
 			System.out.println("CART ITEMS: " + product.displayProduct());
+
+			//products.sort(Comparator.comparing(Product::getId));//short product by id
 			
 		}
 	}
@@ -100,9 +107,23 @@ public class Cart {
 	}
 
 	//Display cart items
-	public String displayCart_tostring() {
+	public String Cart_tostring() {
 		return "Cart [products=" + products + ", total=" + calculateTotal() + "]";
 	}
+
+	//using defensive copy of products rather exposing the original product exposing the copy of product. Here avoiding exposing of the raw product list for safe coding
+	public String displayCart_tostring() {
+    StringBuilder sb = new StringBuilder("Cart Items:\n");
+
+    new ArrayList<>(products).stream() // defensive copy
+        .sorted(Comparator.comparing(Product::getId))
+        .map(Product::displayProduct)
+        .forEach(p -> sb.append(p).append("\n"));
+
+    sb.append("Total: £").append(String.format("%.2f", calculateTotal()));
+    return sb.toString();
+}
+
 	
 	
 }

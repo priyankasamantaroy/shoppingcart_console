@@ -59,7 +59,7 @@ public class Shop {
         
         System.out.println("================================================\n");
     }
-	
+	/*
 	//search product by ID
 	public Product searchProductById(int id)
 	{
@@ -70,7 +70,16 @@ public class Shop {
 		}
 		return null;
 		
-	}
+	}*/
+
+    //using lambda
+    public Product searchProductById(int id) {
+    return shopItems.stream()
+                    .filter(p -> p.getId() == id)
+                    .findFirst()
+                    .orElse(null);
+}
+
 
 	    // Admin: add product to shop inventory
     public void addProduct(Product product) {
@@ -81,7 +90,7 @@ public class Shop {
         shopItems.add(product);
     }
 
-    // Admin: remove product by id
+    // Admin: remove product by id using lambda 
     public boolean removeProductById(int id) {
         return shopItems.removeIf(p -> p.getId() == id);
     }
