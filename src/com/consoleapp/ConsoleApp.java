@@ -65,11 +65,11 @@ public class ConsoleApp {
         while(continueShopping) {
             
             // Print options to select
-            System.out.println(">> View Products/Catalog: 1");
+            System.out.println(">> View Products/Catalogue: 1");
             System.out.println(">> Add Items to cart: 2"); 
             System.out.println(">> Display/View cart items and Itemized total: 3");
-            System.out.println(">> Update/Remove Product: 4");
-            System.out.println(">> Checkout: 5");
+            System.out.println(">> Remove Product: 4");
+            System.out.println(">> View TOTAL amount and Checkout  : 5");
             System.out.println(">> EXIT the Console/System: 6");
             
             System.out.println("\nWhich option you want to select (1-6)?: ");
