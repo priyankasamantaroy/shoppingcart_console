@@ -2,8 +2,8 @@ package com.consoleapp;
 
 public final class Customer extends User {
 
-	public  Cart cart;
-	public String name;
+	private Cart cart;
+	private String name;
 
 	//constructor using super() calls parent constructor from User class
 	public Customer(String name) {
@@ -25,7 +25,7 @@ public final class Customer extends User {
     public String toString() {
         var parentInfo = super.toString();  // super. - accessing parent method
         return parentInfo ;
-    }
+    }	
 
 	
 	
