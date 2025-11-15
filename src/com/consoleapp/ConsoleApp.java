@@ -58,7 +58,7 @@ public class ConsoleApp {
         Shop shop = new Shop();
         
         // Welcome message
-        System.out.println("\n******** Welcome to ShoppingCartConsole: " + custName + " ******* \n");
+        System.out.println("\n******** Welcome to ShoppingCartConsole: " + customer.getFormattedName() + " ******* \n");
         
         // Main menu loop
         boolean continueShopping = true;
@@ -114,7 +114,7 @@ public class ConsoleApp {
                 case 3:
                     System.out.println("=== Your Cart ===");
                     customer.getCart().displayCart_Product();
-                    System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
+                    System.out.println("TOTAL VALUE: £" + customer.getCart().calculateTotal());
                     break;
                 
                 // Update/Remove Product
@@ -147,7 +147,7 @@ public class ConsoleApp {
                         System.out.println("Your cart is empty!");
                     } else {
                         System.out.println("=== Checkout ===");
-                        System.out.println("Final Total: $" + total);
+                        System.out.println("Final Total: £" + total);
                         System.out.println("Thank you for your purchase!");
                     }
                     break;
@@ -169,8 +169,9 @@ public class ConsoleApp {
     // ===================== ADMIN INTERFACE =====================
     private static void adminInterface(Scanner sc, String adminName) {
         Shop shop = new Shop();
+        Admin admin = new Admin(adminName);
         
-        System.out.println("\n******** Welcome Admin: " + adminName + " ******* \n");
+        System.out.println("\n******** Welcome Admin: " + admin.getFormattedName() + " ******* \n");
         
         boolean continueAdmin = true;
         while(continueAdmin) {
