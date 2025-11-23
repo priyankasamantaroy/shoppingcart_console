@@ -1,6 +1,7 @@
 package com.consoleapp;
 
-public abstract class User {
+//This base user class is sealed and allows only customer and admin class  to extend this user class
+public sealed abstract class User permits Customer, Admin {
 
     protected String name;
 

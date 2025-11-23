@@ -2,6 +2,8 @@ package com.consoleapp;
 
 import java.util.Scanner;
 
+
+//This is the entry point for this console aopplication. this app will provide Customer and Admin menus to perom tasks
 public class ConsoleApp {
 
     public static void main(String[] args) {	
@@ -92,24 +94,46 @@ public class ConsoleApp {
                         System.out.println("Enter product ID: ");
                         int pId = sc.nextInt();
                         
-                        Product p = shop.searchProductById(pId);
-                        if(p == null) {
+                        Product shopProduct = shop.searchProductById(pId);
+                        if(shopProduct == null) {
                             System.out.println("Product not found!");
                             sc.nextLine();
                             break;
                         }
+                        if (shopProduct.getQuantity() <= 0) {
+                            System.out.println("Product is out of stock.");
+                            break;
+                        }
                         
-                        System.out.println("Enter quantity: ");
-                        int quantity = getValidInput(sc, 1, 1000);
-                        
-                        customer.getCart().addProduct(p, quantity, p.getCategory());
-                        System.out.println("Product added to cart successfully!");
-                    } catch(Exception e) {
+                        // loop until user provides a valid quantity (or cancels by entering 0)
+                        while (true) {
+                            System.out.println("Enter quantity (available: " + shopProduct.getQuantity() + ", enter 0 to cancel): ");
+                            int quantity = getValidInput(sc, 0, shopProduct.getQuantity());
+                            if (quantity == 0) {
+                                System.out.println("Add cancelled.");
+                                break;
+                            }
+                            try {
+                                Product reserved = shop.reserveProduct(pId, quantity);
+                                customer.getCart().addProduct(reserved, quantity, reserved.getCategory());
+                                System.out.println("Product added to cart successfully!");
+                                break;
+                            } catch (InvalidProductException ipe) {
+                                // if stock changed between read and reserve, refresh and prompt again
+                                System.out.println("Cannot add product: " + ipe.getMessage());
+                                shopProduct = shop.searchProductById(pId);
+                                if (shopProduct == null || shopProduct.getQuantity() <= 0) {
+                                    System.out.println("Product is no longer available.");
+                                    break;
+                                }
+                               
+                            }
+                        }
+                    } catch (Exception e) {
                         System.out.println("Error adding product: " + e.getMessage());
                         sc.nextLine();
                     }
-                    break;
-                
+                    break;                
                 // View cart and total
                 case 3:
                     System.out.println("=== Your Cart ===");
@@ -129,11 +153,11 @@ public class ConsoleApp {
                         System.out.println("Enter Quantity to Remove: ");
                         int removeQuantity = getValidInput(sc, 1, 1000);
                         
-                        customer.getCart().removeProduct(removeID, removeQuantity);
+                        customer.getCart().removeProduct(removeID, removeQuantity, shop);
                         
                         System.out.println("\n--- Remaining Products in Cart ---");
                         customer.getCart().displayCart_Product();
-                        System.out.println("TOTAL VALUE: $" + customer.getCart().calculateTotal());
+                        System.out.println("TOTAL VALUE: £" + customer.getCart().calculateTotal());
                     } catch(Exception e) {
                         System.out.println("Error removing product: " + e.getMessage());
                         sc.nextLine();
@@ -148,6 +172,9 @@ public class ConsoleApp {
                     } else {
                         System.out.println("=== Checkout ===");
                         System.out.println("Final Total: £" + total);
+                       // list purchased items and clear the cart
+                        System.out.println("You have purchased:");
+                        customer.getCart().clearAndReturnItems().forEach(p -> System.out.println(" - " + p.displayProduct()));
                         System.out.println("Thank you for your purchase!");
                     }
                     break;
@@ -166,7 +193,7 @@ public class ConsoleApp {
         }
     }
     
-    // ===================== ADMIN INTERFACE =====================
+    // ===================== ADMIN INTERFACE for admin menu and Flow =====================
     private static void adminInterface(Scanner sc, String adminName) {
         Shop shop = new Shop();
         Admin admin = new Admin(adminName);
@@ -174,8 +201,7 @@ public class ConsoleApp {
         System.out.println("\n******** Welcome Admin: " + admin.getFormattedName() + " ******* \n");
         
         boolean continueAdmin = true;
-        while(continueAdmin) {
-            
+        while(continueAdmin) {            
             System.out.println(">> View All Products in Store: 1");
             System.out.println(">> Add New Product to Store: 2");
             System.out.println(">> Remove Product from Store: 3");
@@ -183,11 +209,10 @@ public class ConsoleApp {
             System.out.println(">> View Inventory Value: 5");
             System.out.println(">> Exit Admin Panel: 6");
             
-            System.out.println("\nWhich option you want to select (1-6)?: ");
-            
+            System.out.println("\nWhich option you want to select (1-6)?: ");            
             int option = getValidInput(sc, 1, 6);
-            System.out.println("You have selected option: " + option + "\n");
-            
+            System.out.println("You have selected option: " + option + "\n");       
+
             switch(option) {
                 
                 // View all products
@@ -202,14 +227,14 @@ public class ConsoleApp {
                         System.out.println("=== Add New Product ===");
                         System.out.println("Enter Product ID: ");
                         int pId = sc.nextInt();
-                        sc.nextLine(); // Clear buffer
+                        sc.nextLine(); 
                         
                         System.out.println("Enter Product Name: ");
                         String pName = sc.nextLine().trim();
                         
                         System.out.println("Enter Product Price: ");
                         double pPrice = sc.nextDouble();
-                        sc.nextLine(); // Clear buffer
+                        sc.nextLine();
                         
                         System.out.println("Enter Product Category (ELECTRONICS, FASHION, GROCERY): ");
                         String pCategory = sc.nextLine().trim();
@@ -232,8 +257,7 @@ public class ConsoleApp {
                         shop.availableProducts();
                         System.out.println("Enter Product ID to Remove: ");
                         int removeId = sc.nextInt();
-                        sc.nextLine();
-                        
+                        sc.nextLine();                        
                         shop.removeProductFromStore(removeId);
                     } catch(Exception e) {
                         System.out.println("Error removing product: " + e.getMessage());
@@ -274,7 +298,7 @@ public class ConsoleApp {
                 case 5:
                     System.out.println("=== Inventory Information ===");
                     System.out.println("Total Products: " + shop.getTotalProducts());
-                    System.out.println("Total Inventory Value: $" + String.format("%.2f", shop.getInventoryValue()));
+                    System.out.println("Total Inventory Value: £" + String.format("%.2f", shop.getInventoryValue()));
                     break;
                 
                 // Exit
@@ -314,3 +338,4 @@ public class ConsoleApp {
         }
     }
 }
+

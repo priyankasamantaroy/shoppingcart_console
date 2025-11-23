@@ -1,8 +1,13 @@
 package com.consoleapp;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-public class Shop {
+//This class is created to manage products and inventories in the Shop
+public class Shop implements ProductManager {
 	/*
 	Create Shop class – to manage products /inventory
 	•	Arry of products will be saved here
@@ -59,35 +64,54 @@ public class Shop {
         
         System.out.println("================================================\n");
     }
-	/*
+	
 	//search product by ID
-	public Product searchProductById(int id)
-	{
-		for(Product p:shopItems) {
-			if(p.getId() == id) {
-				return p;
-			}
-		}
-		return null;
-		
-	}*/
-
     //using lambda
     public Product searchProductById(int id) {
     return shopItems.stream()
                     .filter(p -> p.getId() == id)
                     .findFirst()
                     .orElse(null);
-}
+    }
+
+     /*
+     * Reserve quantity from inventory and return a product snapshot for cart.
+     * Throws InvalidProductException when not enough stock or product missing.
+     */
+    public Product reserveProduct(int id, int quantity) throws InvalidProductException {
+        Product p = searchProductById(id);
+        if (p == null) {
+            throw new InvalidProductException("Product not found: " + id);
+        }
+        if (quantity <= 0) {
+            throw new InvalidProductException("Quantity must be positive");
+        }
+        synchronized (shopItems) {
+            if (p.getQuantity() < quantity) { 
+                throw new InvalidProductException("Not enough stock for product: " + id);
+            }
+            // deduct stock in inventory
+            p.setQuantity(p.getQuantity() - quantity);
+        }
+        // return a fresh product object representing the reserved items
+        return new Product(p.getId(), p.getProductName(), p.getPrice(), p.getCategory(), quantity);
+    }
 
 
-	    // Admin: add product to shop inventory
+	// Admin: add product to shop inventory
     public void addProduct(Product product) {
         if (product == null) {
             System.out.println("Error: Product cannot be null!");
             return;
         }
         shopItems.add(product);
+    }
+
+       // Admin : Add multiple products at a time (varargs)
+     public void addProducts(Product... products) {
+        if (products == null || products.length == 0) return;
+        Product[] arr = products;
+        Arrays.stream(arr).forEach(this::addProduct);
     }
 
     // Admin: remove product by id using lambda 
@@ -98,6 +122,20 @@ public class Shop {
     // Read-only copy of products
     public List<Product> getProducts() {
         return new ArrayList<>(shopItems);
+    }
+
+    /*
+    predicate is using here to apply any given condition to product,
+    if its returns true the product will stay in stream else will excluded from stream */ 
+     @Override
+    public List<Product> filterProducts(Predicate<Product> predicate) {
+        return shopItems.stream().filter(predicate).collect(Collectors.toList());
+    }
+
+    // Return a small status line with today's date and item count
+    public String inventorySnapshotDate() {
+        LocalDate today = LocalDate.now();
+        return "Inventory snapshot: " + ProductManager.formatDate(today) + " - total items: " + getTotalProducts();
     }
 	
 	
@@ -129,10 +167,10 @@ public class Shop {
     }
    
 
-    //new for admin access================================================
+    //Used for Admin access================================================
     // Add new product to store
     public void addProductToStore(int id, String name, double price, String category, int quantity) {
-        // Convert string category to Category enum
+        // Convert string category (pased as param) to Category enum
         Category cat;
         try {
             cat = Category.valueOf(category.toUpperCase());
