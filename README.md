@@ -2,30 +2,61 @@
 ShoppingCartConsole
 ===================
 
-Introduction
-- Console-based shopping cart application supporting customer and admin flows (browse/add/remove/update products, cart management, checkout).
+Lightweight console shopping cart application implementing customer and admin flows (browse/add/remove/update products, cart management, checkout). The code is intentionally small and self-contained so it can be used for demos, exercises, or quick manual testing.
 
-User stories implemented (high level)
-- Customer: browse products, add/remove items to cart, view cart with itemized totals, checkout.
-- Admin: view/add/remove/update products, view inventory stats.
+Quick links to important classes
+- Entry point: [`com.consoleapp.ConsoleApp`](src/com/consoleapp/ConsoleApp.java) — main menu, input handling, and UI flow.
+- Domain & store: [`com.consoleapp.Shop`](src/com/consoleapp/Shop.java), [`com.consoleapp.Product`](src/com/consoleapp/Product.java), [`com.consoleapp.Category`](src/com/consoleapp/Category.java).
+- Users: [`com.consoleapp.Customer`](src/com/consoleapp/Customer.java), [`com.consoleapp.Admin`](src/com/consoleapp/Admin.java), [`com.consoleapp.User`](src/com/consoleapp/User.java).
+- Cart: [`com.consoleapp.Cart`](src/com/consoleapp/Cart.java).
+- Product management API: [`com.consoleapp.ProductManager`](src/com/consoleapp/ProductManager.java).
+- Domain exception: [`com.consoleapp.InvalidProductException`](src/com/consoleapp/InvalidProductException.java).
 
-New/additional language-feature demonstrations added
-- Constructor chaining and overloading (Product).
-- Varargs helper to add multiple products (Shop.addProducts).
-- LVTI (var) usage in loops and local variables.
-- Defensive copying when exposing internal lists (Shop.getProducts, filterProducts).
-- Predicate/lambda-based filterProducts(Predicate<Product>) and usage from ConsoleApp.
-- Immutable ProductRecord (record).
-- Example checked exception InvalidProductException (new file).
-- Method references / lambdas can be used with filterProducts (demonstrated in code).
+Key features and language demos
+- Console-driven customer and admin flows with simple menus in [`com.consoleapp.ConsoleApp`](src/com/consoleapp/ConsoleApp.java).
+- Defensive input handling and validation via helper methods in the console UI.
+- Domain validation and a checked exception for inventory operations: see [`com.consoleapp.Shop.reserveProduct`](src/com/consoleapp/Shop.java) and [`com.consoleapp.InvalidProductException`](src/com/consoleapp/InvalidProductException.java).
+- Modern Java idioms demonstrated: varargs, LVTI (`var`), streams/lambdas, defensive copying, immutable record-like Product (see [`com.consoleapp.Product`](src/com/consoleapp/Product.java)), interface default/static/private methods in [`com.consoleapp.ProductManager`](src/com/consoleapp/ProductManager.java).
 
-Build & Run
-- Use JDK 17+ (records available since Java 16). If using JDK 25 or preview features, configure VS Code Java runtime to JDK 25 and compile/run with --enable-preview as needed.
-- From project root:
-  javac -d out --source-path src src\com\consoleapp\*.java
-  java -cp out com.consoleapp.ConsoleApp
+Exception handling approach (summary)
+- UI-level try/catch blocks around user actions to prevent crashes and provide friendly messages; see [`com.consoleapp.ConsoleApp`](src/com/consoleapp/ConsoleApp.java).
+- Domain errors use a checked exception for invalid inventory operations (`com.consoleapp.InvalidProductException`) — callers catch and handle to allow retry or show an error message: see [`com.consoleapp.Shop.reserveProduct`](src/com/consoleapp/Shop.java).
+- Input validation is defensive: the console loop validates numeric ranges and re-prompts (helper in [`com.consoleapp.ConsoleApp`](src/com/consoleapp/ConsoleApp.java)).
+- Not found results return null from search methods (e.g., [`com.consoleapp.Shop.searchProductById`](src/com/consoleapp/Shop.java)) and callers explicitly check for null before proceeding.
+- Concurrency safety for stock updates: stock decrement uses synchronization in [`com.consoleapp.Shop.reserveProduct`](src/com/consoleapp/Shop.java).
 
-Evaluation (short)
-- Adherence: Core user stories are implemented and functional; UI is separated from domain logic. Additional language features required by the assignment have been added or demonstrated: constructor chaining/overloading, varargs, LVTI, defensive copying, records, a checked exception, and lambda-based filtering with Predicate.
-- Problems encountered: original code review revealed missing explicit examples for several advanced features; these were added minimally to meet the brief without changing existing flows. Ensure all domain files compile together (some method signatures assumed to exist).
-- Next steps: run full compile, review Product/Shop field names to ensure consistency, add unit tests for filterProducts and checked-exception paths, and record a short screencast showcasing the new filtering and the places in code demonstrating the named language features.
+Build & run
+- Recommended JDK: 17+ 
+- Compile and run from project root:
+  - Compile:
+    javac -d out --source-path src src\com\consoleapp\*.java
+  - Run:
+    java -cp out com.consoleapp.ConsoleApp
+
+Project file list (sources & config)
+- [.gitignore](.gitignore)
+- [README.md](README.md)
+- [.vscode/settings.json](.vscode/settings.json)
+- [.github/java-upgrade/20251108215056/progress.md](.github/java-upgrade/20251108215056/progress.md)
+- [.github/java-upgrade/20251108215056/logs/](.github/java-upgrade/20251108215056/logs/)
+- [.github/java-upgrade/20251112214703/progress.md](.github/java-upgrade/20251112214703/progress.md)
+- [.github/java-upgrade/20251112214703/logs/](.github/java-upgrade/20251112214703/logs/)
+- [.github/java-upgrade/20251112214707/logs/](.github/java-upgrade/20251112214707/logs/)
+- [src/com/consoleapp/Admin.java](src/com/consoleapp/Admin.java)
+- [src/com/consoleapp/Cart.java](src/com/consoleapp/Cart.java)
+- [src/com/consoleapp/Category.java](src/com/consoleapp/Category.java)
+- [src/com/consoleapp/ConsoleApp.java](src/com/consoleapp/ConsoleApp.java)
+- [src/com/consoleapp/Customer.java](src/com/consoleapp/Customer.java)
+- [src/com/consoleapp/InvalidProductException.java](src/com/consoleapp/InvalidProductException.java)
+- [src/com/consoleapp/Product.java](src/com/consoleapp/Product.java)
+- [src/com/consoleapp/ProductManager.java](src/com/consoleapp/ProductManager.java)
+- [src/com/consoleapp/Shop.java](src/com/consoleapp/Shop.java)
+- [src/com/consoleapp/User.java](src/com/consoleapp/User.java)
+
+Notes and next steps
+- Add unit tests for filter and checked-exception paths (target [`com.consoleapp.Shop.filterProducts`](src/com/consoleapp/Shop.java) and [`com.consoleapp.InvalidProductException`](src/com/consoleapp/InvalidProductException.java)).
+- Consider centralized logging (instead of only console output) for easier debugging.
+- If you plan to enable preview language features, update build flags (e.g., --enable-preview) and ensure your runtime matches the compiler setting.
+
+
+
