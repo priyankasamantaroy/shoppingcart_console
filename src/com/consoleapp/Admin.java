@@ -17,7 +17,4 @@ public final class Admin extends User {
 	public String getName() {
 		return name;
 	}
-
-
-
 }
